@@ -1,0 +1,1 @@
+src/modules/inference/controllers/inference.controller.ts(9,13): error TS6133: '_user' is declared but its value is never read.

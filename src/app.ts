@@ -58,8 +58,10 @@ app.get('/', (_req: Request, res: Response) => {
 
 // --- API ROUTES ---
 import authRoutes from './modules/auth/routes/auth.routes.js';
+import inferenceRoutes from './modules/inference/routes/inference.routes.js';
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/inference', inferenceRoutes);
 
 // Error Handling
 app.use(errorHandler);

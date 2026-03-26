@@ -1,5 +1,7 @@
-import { logger } from '../config/logger';
-export const errorHandler = (err, req, res, next) => {
+import { logger } from '../config/logger.js';
+export const errorHandler = (err, req, res, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+_next) => {
     const statusCode = err.statusCode || 500;
     const message = err.message || 'Internal Server Error';
     logger.error(`${statusCode} - ${message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);

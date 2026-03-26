@@ -61,11 +61,11 @@ class AuthService {
 
   private generateTokens(userId: string, role: string) {
     const accessToken = jwt.sign({ sub: userId, role }, JWT_ACCESS_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE || '1h',
+      expiresIn: (process.env.JWT_EXPIRE || '1h') as any,
     });
 
     const refreshToken = jwt.sign({ sub: userId }, JWT_REFRESH_SECRET, {
-      expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d',
+      expiresIn: (process.env.JWT_REFRESH_EXPIRE || '7d') as any,
     });
 
     return { accessToken, refreshToken };

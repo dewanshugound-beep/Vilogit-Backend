@@ -3,8 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { rateLimit } from 'express-rate-limit';
-import { errorHandler } from './middleware/error-handler';
-import { logger } from './config/logger';
+import { errorHandler } from './middleware/error-handler.js';
+import { logger } from './config/logger.js';
 const app = express();
 // Security Middleware
 app.use(helmet());
@@ -31,7 +31,7 @@ app.use(morgan(morganFormat, {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Health Check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
     res.status(200).json({
         status: 'success',
         timestamp: new Date().toISOString(),
@@ -40,7 +40,7 @@ app.get('/health', (req, res) => {
     });
 });
 // Root Route
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.status(200).json({
         name: 'Nexvora API',
         version: '1.0.0',
@@ -48,7 +48,11 @@ app.get('/', (req, res) => {
         docs: 'https://docs.nexvora.com',
     });
 });
-// --- API ROUTES WILL GO HERE ---
+// --- API ROUTES ---
+import authRoutes from './modules/auth/routes/auth.routes.js';
+import inferenceRoutes from './modules/inference/routes/inference.routes.js';
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/inference', inferenceRoutes);
 // Error Handling
 app.use(errorHandler);
 // 404 Handler

@@ -1,4 +1,5 @@
 import { Redis } from 'ioredis';
+import { logger } from './logger.js';
 const redisConfig = {
     host: process.env.REDIS_HOST || '127.0.0.1',
     port: parseInt(process.env.REDIS_PORT || '6379'),
@@ -9,10 +10,10 @@ const redisConfig = {
 };
 export const redis = new Redis(redisConfig);
 redis.on('connect', () => {
-    console.log('Successfully connected to Redis');
+    logger.info('Successfully connected to Redis');
 });
 redis.on('error', (err) => {
-    console.error('Redis connection error:', err);
+    logger.error('Redis connection error:', err);
 });
 export default redis;
 //# sourceMappingURL=redis.js.map

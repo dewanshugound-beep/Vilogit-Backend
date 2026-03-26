@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import http from 'http';
-import app from './app';
-import { logger } from './config/logger';
-import { prisma } from './config/prisma';
-import { redis } from './config/redis';
+import app from './app.js';
+import { logger } from './config/logger.js';
+import { prisma } from './config/prisma.js';
+import { redis } from './config/redis.js';
 const PORT = process.env.PORT || 8000;
 const server = http.createServer(app);
 async function bootstrap() {
