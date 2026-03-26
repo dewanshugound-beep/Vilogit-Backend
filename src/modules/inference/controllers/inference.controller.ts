@@ -6,14 +6,15 @@ export class InferenceController {
   static async runInference(req: Request, res: Response, next: NextFunction) {
     try {
       const apiKey = (req as any).apiKey;
-      const { modelId, prompt, payload } = req.body;
+      const { modelId, prompt, payload, stream } = req.body;
 
       if (!modelId || !prompt) {
         throw new AppError('modelId and prompt are required', 400);
       }
 
-      // Check user tier limits and balance
-      // TODO: Implementation
+      if (stream) {
+        return await inferenceService.executeStream(modelId, prompt, payload, apiKey.id, res);
+      }
 
       // Run Inference
       const response = await inferenceService.execute(modelId, prompt, payload, apiKey.id);
