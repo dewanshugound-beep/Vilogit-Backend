@@ -45,10 +45,10 @@ app.get('/health', (_req, res) => {
 // Root Route
 app.get('/', (_req, res) => {
     res.status(200).json({
-        name: 'Nexvora API',
+        name: 'Vilogit API',
         version: '1.0.0',
-        description: 'AI Model Inference Platform Backend',
-        docs: 'https://docs.nexvora.com',
+        description: 'Next-Generation Developer Platform Backend',
+        docs: 'https://docs.vilogit.dev',
     });
 });
 // --- API ROUTES ---
