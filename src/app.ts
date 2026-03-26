@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit';
 import { errorHandler } from './middleware/error-handler.js';
 import { logger } from './config/logger.js';
@@ -11,10 +12,12 @@ const app: Express = express();
 // Security Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true, // Required for httpOnly cookie exchange
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
 }));
+app.use(cookieParser());
 
 // Rate Limiting
 const limiter = rateLimit({
@@ -59,9 +62,11 @@ app.get('/', (_req: Request, res: Response) => {
 // --- API ROUTES ---
 import authRoutes from './modules/auth/routes/auth.routes.js';
 import inferenceRoutes from './modules/inference/routes/inference.routes.js';
+import usersRoutes from './modules/users/routes/users.routes.js';
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/inference', inferenceRoutes);
+app.use('/api/v1/users', usersRoutes);
 
 // Error Handling
 app.use(errorHandler);

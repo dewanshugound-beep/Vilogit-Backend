@@ -1,1 +1,4 @@
-src/modules/inference/controllers/inference.controller.ts(9,13): error TS6133: '_user' is declared but its value is never read.
+src/modules/users/routes/users.routes.ts(2,24): error TS2307: Cannot find module '../../config/prisma.js' or its corresponding type declarations.
+src/modules/users/routes/users.routes.ts(3,51): error TS2307: Cannot find module '../../middleware/require-auth.js' or its corresponding type declarations.
+src/modules/users/routes/users.routes.ts(4,26): error TS2307: Cannot find module '../../middleware/error-handler.js' or its corresponding type declarations.
+src/modules/users/routes/users.routes.ts(86,30): error TS7006: Parameter 'r' implicitly has an 'any' type.
