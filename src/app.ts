@@ -52,10 +52,10 @@ app.get('/health', (_req: Request, res: Response) => {
 // Root Route
 app.get('/', (_req: Request, res: Response) => {
   res.status(200).json({
-    name: 'Nexvora API',
+    name: 'Vilogit API',
     version: '1.0.0',
-    description: 'AI Model Inference Platform Backend',
-    docs: 'https://docs.nexvora.com',
+    description: 'Vilogit Developer Platform Backend',
+    docs: 'https://docs.vilogit.com',
   });
 });
 
@@ -64,11 +64,13 @@ import authRoutes from './modules/auth/routes/auth.routes.js';
 import inferenceRoutes from './modules/inference/routes/inference.routes.js';
 import usersRoutes from './modules/users/routes/users.routes.js';
 import apiKeyRoutes from './modules/api-keys/routes/api-key.routes.js';
+import projectRoutes from './modules/projects/routes/project.routes.js';
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/inference', inferenceRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/api-keys', apiKeyRoutes);
+app.use('/api/v1/projects', projectRoutes);
 
 // Error Handling
 app.use(errorHandler);

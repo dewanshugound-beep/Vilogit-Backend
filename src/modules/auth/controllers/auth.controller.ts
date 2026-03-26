@@ -109,4 +109,36 @@ export class AuthController {
       next(error);
     }
   }
+
+  static async signInWithOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body;
+      const result = await authService.signInWithOtp(email);
+      res.status(200).json({ status: 'success', ...result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async verifyOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, token } = req.body;
+      const { user, tokens } = await authService.verifyOtp(email, token);
+
+      res.cookie(COOKIE_NAME, tokens.refreshToken, COOKIE_OPTIONS);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'OTP verified successfully',
+        data: {
+          user: sanitizeUser(user),
+          tokens: {
+            accessToken: tokens.accessToken,
+          },
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
