@@ -1,0 +1,448 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  DEVELOPER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  DELETED
+}
+
+enum PlanType {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum ModelCategory {
+  TEXT
+  VISION
+  AUDIO
+  MULTIMODAL
+  EMBEDDING
+  CODE
+}
+
+enum ModelStatus {
+  ACTIVE
+  DEPRECATED
+  BETA
+  MAINTENANCE
+}
+
+enum InferenceStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  TIMEOUT
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum TransactionType {
+  CHARGE
+  REFUND
+  CREDIT
+  WITHDRAWAL
+}
+
+enum WebhookEvent {
+  INFERENCE_COMPLETED
+  INFERENCE_FAILED
+  QUOTA_WARNING
+  QUOTA_EXCEEDED
+  BILLING_CHARGED
+  API_KEY_CREATED
+  API_KEY_REVOKED
+}
+
+// ─── USERS ───────────────────────────────────────────────
+
+model User {
+  id                String      @id @default(cuid())
+  email             String      @unique
+  passwordHash      String
+  name              String
+  username          String      @unique
+  avatarUrl         String?
+  role              UserRole    @default(USER)
+  status            UserStatus  @default(PENDING_VERIFICATION)
+  plan              PlanType    @default(FREE)
+  emailVerified     Boolean     @default(false)
+  twoFactorEnabled  Boolean     @default(false)
+  twoFactorSecret   String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  lastLoginAt       DateTime?
+  deletedAt         DateTime?
+
+  // Relations
+  apiKeys           ApiKey[]
+  inferences        Inference[]
+  usageRecords      UsageRecord[]
+  transactions      Transaction[]
+  subscription      Subscription?
+  notifications     Notification[]
+  webhooks          Webhook[]
+  sessions          Session[]
+  auditLogs         AuditLog[]
+  refreshTokens     RefreshToken[]
+
+  @@index([email])
+  @@index([username])
+  @@index([status])
+  @@map("users")
+}
+
+// ─── SESSIONS & TOKENS ───────────────────────────────────
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent    String?
+  ipAddress    String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model RefreshToken {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash   String   @unique
+  isRevoked   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([tokenHash])
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@map("email_verifications")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@map("password_resets")
+}
+
+// ─── API KEYS ─────────────────────────────────────────────
+
+model ApiKey {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  keyPrefix    String       // First 8 chars (e.g. "nx-live-")
+  keyHash      String       @unique  // bcrypt hash of full key
+  status       ApiKeyStatus @default(ACTIVE)
+  permissions  String[]     // ["inference:text", "inference:vision", "usage:read"]
+  rateLimit    Int          @default(100)  // requests per minute
+  monthlyLimit Int?         // null = plan default
+  usageCount   BigInt       @default(0)
+  lastUsedAt   DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  revokedAt    DateTime?
+  revokedReason String?
+
+  inferences   Inference[]
+
+  @@index([userId])
+  @@index([keyHash])
+  @@index([keyPrefix])
+  @@map("api_keys")
+}
+
+// ─── AI MODELS ────────────────────────────────────────────
+
+model Model {
+  id               String        @id @default(cuid())
+  slug             String        @unique  // "gpt-nx4", "vision-pro"
+  name             String
+  description      String
+  longDescription  String?
+  category         ModelCategory
+  status           ModelStatus   @default(ACTIVE)
+  version          String        @default("1.0.0")
+  provider         String        // "nexvora", "openai", "anthropic", "replicate"
+  providerModelId  String?       // External model ID if proxied
+  inputSchema      Json          // JSON Schema for inputs
+  outputSchema     Json          // JSON Schema for outputs
+  defaultParams    Json          @default("{}")
+  capabilities     String[]      // ["streaming", "function_calling", "vision"]
+  contextWindow    Int?          // Max tokens
+  maxOutputTokens  Int?
+  pricePer1kInput  Decimal       @db.Decimal(10,6)  // USD
+  pricePer1kOutput Decimal       @db.Decimal(10,6)
+  avgLatencyMs     Int           @default(0)
+  isPublic         Boolean       @default(true)
+  isFeatured       Boolean       @default(false)
+  tags             String[]
+  coverImageUrl    String?
+  docsUrl          String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deprecatedAt     DateTime?
+
+  inferences       Inference[]
+  usageRecords     UsageRecord[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([status])
+  @@map("models")
+}
+
+// ─── INFERENCE (API CALLS) ────────────────────────────────
+
+model Inference {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  apiKeyId        String?
+  apiKey          ApiKey?         @relation(fields: [apiKeyId], references: [id])
+  modelId         String
+  model           Model           @relation(fields: [modelId], references: [id])
+  status          InferenceStatus @default(QUEUED)
+  input           Json            // Full input payload
+  output          Json?           // Full output (null until completed)
+  error           String?         // Error message if failed
+  inputTokens     Int?
+  outputTokens    Int?
+  totalTokens     Int?
+  costUsd         Decimal?        @db.Decimal(10,6)
+  latencyMs       Int?            // Time from start to completion
+  queuedAt        DateTime        @default(now())
+  startedAt       DateTime?
+  completedAt     DateTime?
+  isStreaming     Boolean         @default(false)
+  ipAddress       String?
+  userAgent       String?
+  requestId       String          @unique @default(cuid())  // For idempotency
+  metadata        Json            @default("{}")
+
+  usageRecord     UsageRecord?
+
+  @@index([userId])
+  @@index([modelId])
+  @@index([status])
+  @@index([requestId])
+  @@index([queuedAt])
+  @@index([apiKeyId])
+  @@map("inferences")
+}
+
+// ─── USAGE RECORDS ────────────────────────────────────────
+
+model UsageRecord {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  inferenceId  String   @unique
+  inference    Inference @relation(fields: [inferenceId], references: [id])
+  modelId      String
+  model        Model    @relation(fields: [modelId], references: [id])
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  totalTokens  Int      @default(0)
+  costUsd      Decimal  @db.Decimal(10,6) @default(0)
+  recordedAt   DateTime @default(now())
+  billingMonth String   // "2025-01" format for monthly rollup
+
+  @@index([userId])
+  @@index([modelId])
+  @@index([billingMonth])
+  @@index([recordedAt])
+  @@map("usage_records")
+}
+
+// ─── SUBSCRIPTIONS & BILLING ─────────────────────────────
+
+model Subscription {
+  id                    String          @id @default(cuid())
+  userId                String          @unique
+  user                  User            @relation(fields: [userId], references: [id])
+  plan                  PlanType
+  interval              BillingInterval @default(MONTHLY)
+  stripeCustomerId      String?         @unique
+  stripeSubscriptionId  String?         @unique
+  stripePriceId         String?
+  status                String          // "active", "past_due", "cancelled", "trialing"
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+  cancelAtPeriodEnd     Boolean         @default(false)
+  cancelledAt           DateTime?
+  trialEndAt            DateTime?
+  monthlyBudgetUsd      Decimal?        @db.Decimal(10,2)  // Spend cap
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  @@map("subscriptions")
+}
+
+model Transaction {
+  id               String          @id @default(cuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id])
+  type             TransactionType
+  amountUsd        Decimal         @db.Decimal(10,2)
+  description      String
+  stripePaymentId  String?
+  stripeInvoiceId  String?
+  metadata         Json            @default("{}")
+  createdAt        DateTime        @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+// ─── PLAN LIMITS ─────────────────────────────────────────
+
+model PlanLimit {
+  id                  String   @id @default(cuid())
+  plan                PlanType @unique
+  monthlyTokens       BigInt   // Total tokens per month
+  requestsPerMinute   Int      // Rate limit
+  requestsPerDay      Int
+  maxApiKeys          Int
+  maxWebhooks         Int
+  maxFileUploadMb     Int
+  supportedModels     String[] // Which model slugs are accessible
+  streamingEnabled    Boolean  @default(false)
+  analyticsRetainDays Int      @default(30)
+  priceMonthlyUsd     Decimal  @db.Decimal(10,2)
+  priceYearlyUsd      Decimal  @db.Decimal(10,2)
+  updatedAt           DateTime @updatedAt
+
+  @@map("plan_limits")
+}
+
+// ─── WEBHOOKS ─────────────────────────────────────────────
+
+model Webhook {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  url         String
+  secret      String         // HMAC signing secret
+  events      WebhookEvent[]
+  isActive    Boolean        @default(true)
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  deliveries  WebhookDelivery[]
+
+  @@index([userId])
+  @@map("webhooks")
+}
+
+model WebhookDelivery {
+  id           String   @id @default(cuid())
+  webhookId    String
+  webhook      Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  event        WebhookEvent
+  payload      Json
+  responseCode Int?
+  responseBody String?
+  success      Boolean
+  attemptCount Int      @default(1)
+  deliveredAt  DateTime @default(now())
+  nextRetryAt  DateTime?
+
+  @@index([webhookId])
+  @@map("webhook_deliveries")
+}
+
+// ─── NOTIFICATIONS ────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   // "info", "success", "warning", "error"
+  isRead    Boolean  @default(false)
+  data      Json     @default("{}")
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+// ─── AUDIT LOGS ───────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String   // "user.login", "api_key.created", "model.inference"
+  resource   String   // "user", "api_key", "inference"
+  resourceId String?
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
