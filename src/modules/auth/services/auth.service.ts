@@ -43,6 +43,29 @@ class AuthService {
     return { user, tokens };
   }
 
+  async login(input: LoginInput) {
+    const user = await prisma.user.findUnique({ where: { email: input.email } });
+
+    if (!user || !(await bcrypt.compare(input.password, user.passwordHash))) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    if (user.status === 'SUSPENDED') {
+      throw new AppError('Your account has been suspended. Contact support.', 403);
+    }
+
+    if (user.status === 'DELETED') {
+      throw new AppError('This account no longer exists', 404);
+    }
+
+    const tokens = this.generateTokens(user.id, user.role);
+    await this.saveRefreshToken(user.id, tokens.refreshToken);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
     return { user, tokens };
   }
 
