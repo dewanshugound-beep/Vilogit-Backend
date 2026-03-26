@@ -3,7 +3,7 @@ import { authService } from '../services/auth.service.js';
 import { RegisterInput, LoginInput } from '../schemas/auth.schema.js';
 import { AppError } from '../../../middleware/error-handler.js';
 
-const COOKIE_NAME = 'nexvora_rt';
+const COOKIE_NAME = 'vilogit_rt';
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
