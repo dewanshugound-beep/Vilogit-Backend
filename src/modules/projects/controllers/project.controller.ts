@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../lib/supabase.js';
 
 export const createProject = async (req: Request, res: Response) => {
   const { name, description, tech_stack, visibility, owner_id } = req.body;

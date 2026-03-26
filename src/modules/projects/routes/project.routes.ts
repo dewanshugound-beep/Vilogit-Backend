@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { createProject } from '../controllers/project.controller';
+import { supabase } from '../../../lib/supabase.js';
+import { createProject } from '../controllers/project.controller.js';
 
 const router = Router();
 
