@@ -55,9 +55,11 @@ app.get('/', (_req, res) => {
 import authRoutes from './modules/auth/routes/auth.routes.js';
 import inferenceRoutes from './modules/inference/routes/inference.routes.js';
 import usersRoutes from './modules/users/routes/users.routes.js';
+import apiKeyRoutes from './modules/api-keys/routes/api-key.routes.js';
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/inference', inferenceRoutes);
 app.use('/api/v1/users', usersRoutes);
+app.use('/api/v1/api-keys', apiKeyRoutes);
 // Error Handling
 app.use(errorHandler);
 // 404 Handler

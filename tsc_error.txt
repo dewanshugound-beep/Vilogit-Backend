@@ -1,4 +1,2 @@
-src/modules/users/routes/users.routes.ts(2,24): error TS2307: Cannot find module '../../config/prisma.js' or its corresponding type declarations.
-src/modules/users/routes/users.routes.ts(3,51): error TS2307: Cannot find module '../../middleware/require-auth.js' or its corresponding type declarations.
-src/modules/users/routes/users.routes.ts(4,26): error TS2307: Cannot find module '../../middleware/error-handler.js' or its corresponding type declarations.
-src/modules/users/routes/users.routes.ts(86,30): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/modules/api-keys/controllers/api-key.controller.ts(32,48): error TS2345: Argument of type 'string | string[]' is not assignable to parameter of type 'string'.
+  Type 'string[]' is not assignable to type 'string'.
