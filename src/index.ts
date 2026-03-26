@@ -8,17 +8,14 @@ import { redis } from './config/redis.js';
 const PORT = process.env.PORT || 8000;
 const server = http.createServer(app);
 
-async function bootstrap() {
-  // 1. Database Connection (Graceful)
-  try {
-    await prisma.$connect();
-    logger.info('Database connection established');
-  } catch (error) {
-    logger.error('Database connection failed - entering degraded mode:', error);
-    // Continue instead of exiting - allows health checks and metrics to stay up
-  }
+import { connectDB } from './config/prisma.js';
 
+async function bootstrap() {
+  // 1. Database Connection (Non-blocking)
+  connectDB().catch(err => logger.error('Unhandled DB error during start:', err));
+  
   // 2. Redis Connection (Graceful)
+
   try {
     const ping = await redis.ping();
     if (ping === 'PONG') {

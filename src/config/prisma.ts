@@ -1,13 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 
-declare global {
-  var prisma: PrismaClient | undefined;
-}
+// Lazy load or handle connection errors manually to prevent crash
+export const prisma = new PrismaClient({
+  log: ['info', 'warn', 'error'],
+});
 
-export const prisma = global.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  global.prisma = prisma;
-}
+export const connectDB = async () => {
+  try {
+    await prisma.$connect();
+    console.log('Database connection established');
+  } catch (err) {
+    console.error('Database connection failed:', err);
+  }
+};
 
 export default prisma;
