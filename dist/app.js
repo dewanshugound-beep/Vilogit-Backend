@@ -45,10 +45,8 @@ app.get('/health', (_req, res) => {
 // Root Route
 app.get('/', (_req, res) => {
     res.status(200).json({
-        name: 'Vilogit API',
-        version: '1.0.0',
-        description: 'Vilogit Developer Platform Backend',
-        docs: 'https://docs.vilogit.com',
+        status: 'success',
+        message: 'Vilogit Backend Origin is LIVE!'
     });
 });
 // --- API ROUTES ---
