@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiKeyService } from '../services/api-key.service.js';
 import { CreateApiKeyInput } from '../schemas/api-key.schema.js';
-import { AuthenticatedRequest } from '../../../middleware/require-auth.js';
+import { AuthenticatedRequest } from '@/middleware/require-auth.js';
 
 export class ApiKeyController {
   static async list(req: Request, res: Response, next: NextFunction) {

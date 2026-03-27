@@ -26,7 +26,7 @@ export const createProject = async (req, res) => {
     if (!data || data.length === 0) {
         return res.status(400).json({ error: 'No data returned after insertion' });
     }
-    console.log("✅ New project locked in:\", data[0].name););
+    global.console.log("✅ New project locked in:\", data[0].name););
     return res.status(201).json(data[0]);
 };
 //# sourceMappingURL=project.controller.js.map

@@ -33,6 +33,6 @@ export const createProject = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'No data returned after insertion' });
   }
 
-  console.log(\"✅ New project locked in:\", data[0].name);
+  global.console.log(\"✅ New project locked in:\", data[0].name);
   return res.status(201).json(data[0]);
 };
