@@ -31,6 +31,7 @@ const format = winston.format.combine(
   )
 );
 
+// 🚀 Vilo Stateless Engine: Disable disk-based logging for Serverless compatibility
 const isProduction = process.env.NODE_ENV === 'production';
 
 const transports: winston.transport[] = [
