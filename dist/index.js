@@ -6,28 +6,25 @@ import { prisma } from './config/prisma.js';
 import { redis } from './config/redis.js';
 const PORT = process.env.PORT || 8000;
 const server = http.createServer(app);
+import { connectDB } from './config/prisma.js';
 async function bootstrap() {
+    // 1. Database Connection (Non-blocking)
+    connectDB().catch(err => logger.error('Unhandled DB error during start:', err));
+    // 2. Redis Connection (Graceful)
     try {
-        // 1. Connect to Database
-        await prisma.$connect();
-        logger.info('Database connection established');
-        // 2. Connect to Redis
-        // Redis connection is handled automatically by ioredis, 
-        // but we can verify it's working
         const ping = await redis.ping();
         if (ping === 'PONG') {
             logger.info('Redis connection verified');
         }
-        // 3. Start Server
-        server.listen(PORT, () => {
-            logger.info(`Nexvora Backend running on port ${PORT}`);
-            logger.info(`Environment: ${process.env.NODE_ENV}`);
-        });
     }
     catch (error) {
-        logger.error('Failed to start server:', error);
-        process.exit(1);
+        logger.error('Redis connection failed:', error);
     }
+    // 3. Start Server
+    server.listen(PORT, () => {
+        logger.info(`Vilogit Backend running on port ${PORT}`);
+        logger.info(`Environment: ${process.env.NODE_ENV}`);
+    });
 }
 // Handle Graceful Shutdown
 const gracefulShutdown = async () => {

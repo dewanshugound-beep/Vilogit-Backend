@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { prisma } from '../../../config/prisma.js';
 import { AppError } from '../../../middleware/error-handler.js';
+import { supabase } from '../../../lib/supabase.js';
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'dev-access-secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret';
 const ACCESS_EXPIRE = process.env.JWT_EXPIRE || '1h';
@@ -50,6 +51,43 @@ class AuthService {
             where: { id: user.id },
             data: { lastLoginAt: new Date() },
         });
+        return { user, tokens };
+    }
+    async signInWithOtp(email) {
+        const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+                emailRedirectTo: `${process.env.FRONTEND_URL}/dashboard`,
+            },
+        });
+        if (error) {
+            throw new AppError(error.message, 400);
+        }
+        return { message: 'Verification code sent to your email' };
+    }
+    async verifyOtp(email, token) {
+        const { data, error } = await supabase.auth.verifyOtp({
+            email,
+            token,
+            type: 'email',
+        });
+        if (error || !data.user) {
+            throw new AppError(error?.message || 'Invalid or expired OTP', 401);
+        }
+        // Sync user in our local DB if they don't exist
+        let user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    username: email.split('@')[0] + Math.floor(Math.random() * 1000),
+                    name: email.split('@')[0],
+                    status: 'ACTIVE',
+                },
+            });
+        }
+        const tokens = this.generateTokens(user.id, user.role);
+        await this.saveRefreshToken(user.id, tokens.refreshToken);
         return { user, tokens };
     }
     async refreshAccessToken(rawRefreshToken) {

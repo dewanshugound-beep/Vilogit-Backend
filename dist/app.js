@@ -47,8 +47,8 @@ app.get('/', (_req, res) => {
     res.status(200).json({
         name: 'Vilogit API',
         version: '1.0.0',
-        description: 'Next-Generation Developer Platform Backend',
-        docs: 'https://docs.vilogit.dev',
+        description: 'Vilogit Developer Platform Backend',
+        docs: 'https://docs.vilogit.com',
     });
 });
 // --- API ROUTES ---
@@ -56,10 +56,12 @@ import authRoutes from './modules/auth/routes/auth.routes.js';
 import inferenceRoutes from './modules/inference/routes/inference.routes.js';
 import usersRoutes from './modules/users/routes/users.routes.js';
 import apiKeyRoutes from './modules/api-keys/routes/api-key.routes.js';
+import projectRoutes from './modules/projects/routes/project.routes.js';
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/inference', inferenceRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/api-keys', apiKeyRoutes);
+app.use('/api/v1/projects', projectRoutes);
 // Error Handling
 app.use(errorHandler);
 // 404 Handler

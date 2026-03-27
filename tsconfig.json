@@ -12,6 +12,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "lib": ["ESNext"],
     "types": ["node"],
     "sourceMap": true,
     "noImplicitAny": true,
