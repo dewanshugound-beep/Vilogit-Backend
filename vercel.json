@@ -1,9 +1,8 @@
 {
-  "outputDirectory": ".",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "src/index.ts"
+      "destination": "/index.js"
     }
   ]
 }

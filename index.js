@@ -1,8 +1,13 @@
 import app from './src/app.js';
 import { logger } from './src/config/logger.js';
 
-const PORT = process.env.PORT || 8000;
+// Export the app for Vercel's serverless environment
+export default app;
 
-app.listen(PORT, () => {
-  logger.info(`Server is running on port ${PORT}`);
-});
+// Only run the server locally or in non-production environments
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 8000;
+  app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
+  });
+}
