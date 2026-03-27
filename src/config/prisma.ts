@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 
-// Lazy load or handle connection errors manually to prevent crash
 export const prisma = new PrismaClient({
   log: ['info', 'warn', 'error'],
 });
