@@ -36,7 +36,7 @@ class AuthService {
     }
     async login(input) {
         const user = await prisma.user.findUnique({ where: { email: input.email } });
-        if (!user || !(await bcrypt.compare(input.password, user.passwordHash))) {
+        if (!user || !user.passwordHash || !(await bcrypt.compare(input.password, user.passwordHash))) {
             throw new AppError('Invalid email or password', 401);
         }
         if (user.status === 'SUSPENDED') {
