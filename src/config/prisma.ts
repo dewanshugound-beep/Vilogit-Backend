@@ -1,7 +1,14 @@
 import pkg from '@prisma/client';
 const { PrismaClient } = pkg;
 
-export const prisma = new PrismaClient();
+export const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+  log: ['warn', 'error'],
+});
 
 export const connectDB = async () => {
   try {
