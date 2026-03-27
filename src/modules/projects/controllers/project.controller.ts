@@ -24,7 +24,7 @@ export const createProject = async (req: Request, res: Response) => {
 
   // 3. Error Handling (No ghosting allowed!)
   if (error) {
-    console.error(\"❌ Database insertion trippin':\", error.message);
+    console.error("❌ Database insertion trippin':", error.message);
     return res.status(400).json({ error: error.message });
   }
 
@@ -33,6 +33,6 @@ export const createProject = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'No data returned after insertion' });
   }
 
-  global.console.log(\"✅ New project locked in:\", data[0].name);
+  global.console.log("✅ New project locked in:", data[0].name);
   return res.status(201).json(data[0]);
 };

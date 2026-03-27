@@ -68,9 +68,9 @@ class InferenceService {
           costUsd: costLog,
           completedAt: new Date(),
         },
-      }).then(async (record) => {
+      }).then(async (record: any) => {
         await this.createUsageRecord(record.id, apiKey.userId, modelId, tokensUsedBase, outputTokens, costLog);
-      }).catch(err => logger.error('Failed to log inference:', err));
+      }).catch((err: any) => logger.error('Failed to log inference:', err));
 
       res.write('data: [DONE]\n\n');
       res.end();

@@ -19,7 +19,7 @@ export class ApiKeyService {
             orderBy: { createdAt: 'desc' },
         });
         // Serialize BigInt if needed, Prisma client returns BigInt for usageCount
-        return keys.map(k => ({
+        return keys.map((k) => ({
             ...k,
             usageCount: Number(k.usageCount),
         }));
