@@ -1,13 +1,7 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import { PrismaClient } from '@prisma/client';
 
-export const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-  log: ['warn', 'error'],
+export const prisma = new PrismaClient({ 
+  log: ['query', 'info', 'warn', 'error'] 
 });
 
 export const connectDB = async () => {

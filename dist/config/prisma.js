@@ -1,7 +1,6 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import { PrismaClient } from '@prisma/client';
 export const prisma = new PrismaClient({
-    log: ['info', 'warn', 'error'],
+    log: ['query', 'info', 'warn', 'error']
 });
 export const connectDB = async () => {
     try {
