@@ -12,3 +12,14 @@ const options: any = {
 };
 
 export const prisma = new PrismaClient(options);
+
+export const connectDB = async () => {
+  try {
+    await prisma.$connect();
+    console.log('Database connection established');
+  } catch (err) {
+    console.error('Database connection failed:', err);
+  }
+};
+
+export default prisma;

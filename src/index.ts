@@ -12,7 +12,7 @@ import { connectDB } from './config/prisma.js';
 
 async function bootstrap() {
   // 1. Database Connection (Non-blocking)
-  connectDB().catch(err => logger.error('Unhandled DB error during start:', err));
+  connectDB().catch((err: any) => logger.error('Unhandled DB error during start:', err));
   
   // 2. Redis Connection (Graceful)
 

@@ -1,7 +1,14 @@
 import { PrismaClient } from '@prisma/client';
-export const prisma = new PrismaClient({
-    log: ['query', 'info', 'warn', 'error']
-});
+const databaseUrl = process.env.DATABASE_URL || "postgresql://postgres:dummy@localhost:5432/dummy";
+const options = {
+    datasources: {
+        db: {
+            url: databaseUrl,
+        },
+    },
+    log: ['query', 'info', 'warn', 'error'],
+};
+export const prisma = new PrismaClient(options);
 export const connectDB = async () => {
     try {
         await prisma.$connect();
