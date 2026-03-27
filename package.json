@@ -10,7 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test": "vitest",
-    "postinstall": "prisma generate"
+    "postinstall": "PRISMA_CLI_QUERY_ENGINE_TYPE=library prisma generate"
   },
   "keywords": [],
   "author": "",
